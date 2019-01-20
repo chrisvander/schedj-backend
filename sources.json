@@ -1,6 +1,7 @@
 {
 	"sis": {
-		"login": "https://sis.rpi.edu/rss/twbkwbis.P_ValLogin"
+		"login": "https://sis.rpi.edu/rss/twbkwbis.P_ValLogin",
+		"classes": "https://sis.rpi.edu/rss/bwskfreg.P_AltPin"
 	},
 	"yacs": {
 		"departments": "https://yacs.cs.rpi.edu/api/v5/schools.json?show_departments=true"

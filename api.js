@@ -2,7 +2,7 @@ var request = require("request");
 request = request.defaults({jar: true});
 
 const sources = require('./sources.json');
-const scraper = require('./scraper.js')
+const $ = require('cheerio');
 
 module.exports = {
 	login: (user, pass, next) => {
@@ -18,11 +18,24 @@ module.exports = {
 			  }
 			}, (err, res, body) => {
 				if (!err && res.statusCode == 200) {
-            next(null, res.headers['set-cookie']);
+					var msg = $('meta',body).attr('content');
+          next(null, res.headers['set-cookie'], msg.slice(
+          	msg.indexOf('Welcome,+')+9,
+          	msg.indexOf('+to+the+Rensselaer')-1
+          ));
         } else {
             next(err);
         }
 			});
+		});
+	},
+	get_current_term: (next) => {
+		request.get(sources.sis.classes, (err, res, html) => {
+			if (!err) {
+				//success!
+		    next(null, $('option', '#term_id', html).attr('value'));
+		  }
+		  else next(err);
 		});
 	},
 	yacs: {
