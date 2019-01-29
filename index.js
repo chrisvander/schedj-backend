@@ -10,6 +10,8 @@ app.use(cookieParser());
 
 // YACS
 
+require('./yacs.js')(app);
+
 app.get("/api/departments", (req,res) => 
 	api.yacs.departments((err, body) => {
 		if (!err) res.send(body);
