@@ -22,7 +22,17 @@ module.exports = function(app, api, auth) {
 					res.send(JSON.stringify(reply));
 				});
 			}
-			else res.send(err);
+			else res.status(500).send(err);
 		})
+	);
+
+	// Logout route
+	app.get("/logout", (req,res) =>{
+		api.logout( (err) => {
+			if (err)
+				res.status(500).send(err);
+			else
+				res.send("SUCCESS");
+		})}
 	);
 }
