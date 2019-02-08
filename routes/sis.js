@@ -37,10 +37,10 @@ module.exports = function(app, api, auth) {
 	);
 
 	//Student Menu Route - just for testing
-	app.get("/get_student_menu", (req, res) =>{
-		api.get_student_menu((err) => {
+	app.get("/get_student_menu", (req, res) => {
+		api.get_student_menu((err, html) => {
 			if (!err)
-				res.send("SUCCESS");
+				res.send(html);
 			else
 				res.status(500).send(err);
 		})
