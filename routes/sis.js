@@ -22,7 +22,27 @@ module.exports = function(app, api, auth) {
 					res.send(JSON.stringify(reply));
 				});
 			}
-			else res.send(err);
+			else res.status(500).send(err);
 		})
 	);
+
+	// Logout route
+	app.get("/logout", (req,res) =>{
+		api.logout( (err) => {
+			if (!err)
+				res.send("SUCCESS");
+			else
+				res.status(500).send(err);
+		})}
+	);
+
+	//Student Menu Route - just for testing
+	app.get("/get_student_menu", (req, res) => {
+		api.get_student_menu((err, html) => {
+			if (!err)
+				res.send(html);
+			else
+				res.status(500).send(err);
+		})
+	})
 }
