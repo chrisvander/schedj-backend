@@ -33,31 +33,27 @@ module.exports = {
 		},
 		logout: (next) => {
 			// gets URL first
-			request.get(sources.sis.logout, () =>{
-				request({
-					uri: sources.sis.logout,
-					method: "GET"
-				}, (err, res, body) => {
-					if (!err && res.statusCode == 200) {
-						next(null);
-					} else {
-						next(err);
-					}
-				});
+			request({
+				uri: sources.sis.logout,
+				method: "GET"
+			}, (err, res, body) => {
+				if (!err && res.statusCode == 200) {
+					next(null);
+				} else {
+					next(err);
+				}
 			});
 		},
 		get_student_menu: (next) => {
-			request.get(sources.sis.get_student_menu, () =>{
-				request({
-					uri: sources.sis.get_student_menu,
-					method: "GET",
-				}, (err, res, body) => {
-					if (!err && res.statusCode == 200) {
-						next(null);
-					} else {
-						next(err);
-					}
-				});
+			request({
+				uri: sources.sis.get_student_menu,
+				method: "GET",
+			}, (err, res, body) => {
+				if (!err && res.statusCode == 200) {
+					next(null, body);
+				} else {
+					next(err);
+				}
 			});
 		},
 		get_current_term: (next) => {
