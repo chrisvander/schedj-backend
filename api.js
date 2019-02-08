@@ -32,17 +32,28 @@ module.exports = {
 			});
 		},
 		logout: (next) => {
+			// gets URL first
 			request.get(sources.sis.logout, () =>{
 				request({
 					uri: sources.sis.logout,
 					method: "GET"
 				}, (err, res, body) => {
 					if (!err && res.statusCode == 200) {
-						var msg = $('meta',body).attr('content');
-						next(null, res.headers['set-cookie'], msg.slice(
-							msg.indexOf('Welcome,+')+9,
-							msg.indexOf('+to+the+Rensselear')-1
-						));
+						next(null);
+					} else {
+						next(err);
+					}
+				});
+			});
+		},
+		get_student_menu: (next) => {
+			request.get(sources.sis.get_student_menu, () =>{
+				request({
+					uri: sources.sis.get_student_menu,
+					method: "GET",
+				}, (err, res, body) => {
+					if (!err && res.statusCode == 200) {
+						next(null);
 					} else {
 						next(err);
 					}
