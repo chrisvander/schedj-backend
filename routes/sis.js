@@ -35,4 +35,14 @@ module.exports = function(app, api, auth) {
 				res.send("SUCCESS");
 		})}
 	);
+
+	//Student Menu Route - just for testing
+	app.get("/get_student_menu", (req, res) =>{
+		api.get_student_menu((err) => {
+			if (err)
+				res.status(500).send(err);
+			else 
+				res.send("SUCCESS");
+		})
+	})
 }
