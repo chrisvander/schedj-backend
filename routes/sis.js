@@ -13,7 +13,7 @@ module.exports = function(app, api, auth) {
 	app.post("/login", (req,res) =>
 		api.login(req.query.user, req.query.pass, (err, cookie, name) => {
 			if (!err) {
-				if (cookie[0].startsWith("SESSID=;")) res.send("No SESSID returned");
+				if (cookie[0].startsWith("SESSID=;")) res.status(403).send("No SESSID returned");
 				else api.get_current_term((err, term) => {
 					var reply = new Object();
 					reply.term = term;
