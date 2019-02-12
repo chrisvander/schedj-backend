@@ -1,10 +1,3 @@
-// SIS middleware to verify SESSID exists on authorized paths
-function auth(req,res,next) {
-	if (req.cookies.sessid !== "" && req.cookies.sessid) {
-		next();
-	}
-	else res.status(403).send("Requires SESSID");
-}
 
 module.exports = function(app, api, auth) {
 
