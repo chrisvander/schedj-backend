@@ -14,6 +14,12 @@ require('./routes/yacs.js')(app, api.yacs);
 // SIS
 require('./routes/sis.js')(app, api.sis);
 
+// handshake
+app.get("/verify_status", (req, res) => {
+	console.log("Client handshake");
+	res.send({ status: 'active' });
+});
+
 // SERVER
 
 app.listen(8080, () => {

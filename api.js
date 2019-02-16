@@ -1,4 +1,5 @@
 var request = require("request");
+// use a single request object in order to hold cookies in session
 request = request.defaults({jar: true});
 
 const sources = require('./sources.json');
