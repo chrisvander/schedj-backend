@@ -38,4 +38,24 @@ module.exports = function(app, api, auth) {
 				res.status(500).send(err);
 		})
 	})
+
+	app.get("/address", (req, res) => {
+		api.get_address((err, data) => {
+			if (err)
+				res.status(500).send(err)
+			else
+				res.send(data);
+		})
+	});
+
+	app.get("/feed/registration", (req, res) => {
+		var term = req.query.term;
+		if (!term) res.status(400).send("Requires term param");
+		else api.get_registration_status(term, (err, data) => {
+			if (err)
+				res.status(500).send(err);
+			else
+				res.send(data);
+		});
+	});
 }

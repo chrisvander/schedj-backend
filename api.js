@@ -66,6 +66,44 @@ module.exports = {
 			  else next(err);
 			});
 		},
+		get_address: (next) => {
+			request.get(sources.sis.address, (err, res, html) => {
+				if (!err) {
+					var data = {
+						address: '',
+						city: '',
+						zip: '',
+						zip_short: ''
+					}
+					var raw = $('table.datadisplaytable > tbody > tr:nth-child(3) > td:nth-child(2)', html)
+						.html()
+						.replace(/\n/g,'')
+						.split('<br>');
+					var cityzip = raw[1].split('&#xA0; &#xA0; ');
+					data.address = raw[0];
+					data.city = cityzip[0].split(', ')[0];
+					data.state = cityzip[0].split(', ')[1];
+					data.zip = cityzip[1];
+					data.zip_short = cityzip[1].split('-')[0];
+					next(null, data);
+				}
+				else next(err)
+			})
+		},
+		get_registration_status: (term, next) => {
+			request.post(sources.sis.registration + '?term_in=' + term, (err, res, html) => {
+				if (err) next(err);
+				else {
+					var obj = {};
+					var arr = $('div.pagebodydiv > table:nth-child(2) > tbody > tr:nth-child(2)', html).html().split('\n');
+					obj["start_date"] = $('td', arr[1]).text();
+					obj["start_time"] = $('td', arr[2]).text();
+					obj["end_date"] = $('td', arr[3]).text();
+					obj["end_time"] = $('td', arr[4]).text();
+					next(null, obj);
+				}
+			});
+		}
 	},
 
 	
