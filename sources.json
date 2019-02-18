@@ -6,6 +6,7 @@
 		"get_student_menu": "https://sis.rpi.edu/rss/twbkwbis.P_GenMenu?name=bmenu.P_StuMainMnu"
 	},
 	"yacs": {
-		"departments": "https://yacs.cs.rpi.edu/api/v5/schools.json?show_departments=true"
+		"departments": "https://yacs.cs.rpi.edu/api/v5/schools.json?show_departments=true",
+		"courses": "https://yacs.cs.rpi.edu/api/v5/courses.json?department_id="
 	}
 }
