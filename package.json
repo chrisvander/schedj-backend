@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ."
+    "start": "nodemon --ignore 'data/**/*' ."
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +13,7 @@
     "cheerio": "^1.0.0-rc.2",
     "cookie-parser": "^1.4.3",
     "express": "^4.16.4",
+    "node-cron": "^2.0.3",
     "moment": "^2.24.0",
     "nodemon": "^1.18.9",
     "puppeteer": "^1.11.0",

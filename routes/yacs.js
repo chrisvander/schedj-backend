@@ -1,11 +1,8 @@
-module.exports = (app, api) => {
+module.exports = (app, api, update) => {
 
+	app.get("/api/update", (req,res) => {
+		update();
+		res.send("Ran update");
+	});
 
-	app.get("/api/departments", (req,res) => 
-		api.departments((err, body) => {
-			if (!err) res.send(body);
-			else res.send(err);
-		}));
-
-	
 }

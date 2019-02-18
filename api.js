@@ -120,6 +120,12 @@ module.exports = {
 				if (!err) next(null, body);
 				else next(err);
 			});
+		},
+		courses: (dep_id, next) => {
+			request.get(sources.yacs.courses + dep_id + "&show_periods=true&show_sections=true&", (err, res, body) => {
+				if (!err) next(null, body);
+				else next(err);
+			});
 		}
 	}
 
