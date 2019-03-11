@@ -1,5 +1,6 @@
 const api = require('./api.js').yacs;
 const fs = require('fs');
+const path = require('path');
 
 var num_files = 0;
 var total = 0;
@@ -25,14 +26,25 @@ module.exports = () => {
 		    if (err2)
 		        return console.log(err2);
 		    console.log("- Saved 'departments.json'");
-		    var obj = JSON.parse(body)
-		    total = 0;
-		    obj.schools.forEach((school) => total+=school.departments.length);
-				obj.schools.forEach(
-					(school) => school.departments.forEach((item) => {
-						writeDepartment(item)
-					})
-				);
+		    var directory = "./data/courses/";
+		    fs.readdir(directory, (err, files) => {
+				  if (err) throw err;
+
+				  for (const file of files) {
+				    fs.unlink(path.join(directory, file), err => {
+				      if (err) throw err;
+				    });
+				  }
+
+				  var obj = JSON.parse(body)
+			    total = 0;
+			    obj.schools.forEach((school) => total+=school.departments.length);
+					obj.schools.forEach(
+						(school) => school.departments.forEach((item) => {
+							writeDepartment(item)
+						})
+					);
+				});
 			});
 	});
 }

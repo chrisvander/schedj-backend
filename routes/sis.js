@@ -15,7 +15,10 @@ module.exports = function(app, api, auth) {
 					res.send(JSON.stringify(reply));
 				});
 			}
-			else res.status(500).send(err);
+			else {
+				res.statusMessage = err;
+				res.status(500).send(err);
+			}
 		})
 	);
 
@@ -24,28 +27,32 @@ module.exports = function(app, api, auth) {
 		api.logout( (err) => {
 			if (!err)
 				res.send("SUCCESS");
-			else
+			else {
+				res.statusMessage = err;
 				res.status(500).send(err);
-		})}
-	);
+			}
+		})
+	});
 
 	//Student Menu Route - just for testing
 	app.get("/get_student_menu", (req, res) => {
 		api.get_student_menu((err, html) => {
 			if (!err)
 				res.send(html);
-			else
+			else {
+				res.statusMessage = err;
 				res.status(500).send(err);
-		})
+			}})
 	})
 
 	app.get("/address", (req, res) => {
 		api.get_address((err, data) => {
-			if (err)
-				res.status(500).send(err)
-			else
-				res.send(data);
-		})
+			if (!err)
+				res.send(data)
+			else {
+				res.statusMessage = err;
+				res.status(500).send(err);
+			}})
 	});
 
 	app.get("/feed/registration", (req, res) => {
@@ -57,5 +64,9 @@ module.exports = function(app, api, auth) {
 			else
 				res.send(data);
 		});
+	});
+
+	app.get("/student_info", (req, res) => {
+		
 	});
 }

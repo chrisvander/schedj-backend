@@ -1,6 +1,11 @@
 var request = require("request");
 // use a single request object in order to hold cookies in session
-request = request.defaults({jar: true});
+request = request.defaults({
+	jar: true,
+	agentOptions: {
+    rejectUnauthorized: false
+  }
+});
 
 const sources = require('./sources.json');
 const $ = require('cheerio');
@@ -24,12 +29,17 @@ module.exports = {
 				}, (err, res, body) => {
 					if (!err && res.statusCode == 200) {
 						var msg = $('meta',body).attr('content');
-	          next(null, res.headers['set-cookie'], msg.slice(
-	          	msg.indexOf('Welcome,+')+9,
-	          	msg.indexOf('+to+the+Rensselaer')-1
-	          ));
+						try {
+							next(null, res.headers['set-cookie'], msg.slice(
+		          	msg.indexOf('Welcome,+')+9,
+		          	msg.indexOf('+to+the+Rensselaer')-1
+		          ));
+						}
+	          catch (err) {
+	          	next("Problem communicating with SIS");
+	          }
 	        } else {
-	            next(err);
+            next(err);
 	        }
 				});
 			});
@@ -109,6 +119,12 @@ module.exports = {
 					next(null, obj);
 				}
 			});
+		},
+		get_student_info: (next) => {
+			request.post()
+		},
+		get_grades: (term, next) => {
+			
 		}
 	},
 
