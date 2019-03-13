@@ -125,6 +125,16 @@ module.exports = {
 		},
 		get_grades: (term, next) => {
 			
+		},
+		get_holds_bool: (next) => {
+			request.get(sources.sis.holds, (err, res, html) => {
+				if (err) next(err);
+				else {
+					if ($('body > div.pagebodydiv > table.datadisplaytable > tbody > tr:nth-child(2) > td:nth-child(1)').html()!='')
+						next(null, true);
+					else next(null, false);
+				}
+			})
 		}
 	},
 

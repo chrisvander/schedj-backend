@@ -69,4 +69,11 @@ module.exports = function(app, api, auth) {
 	app.get("/student_info", (req, res) => {
 		
 	});
+
+	app.get("/exists_hold", (req, res) => {
+		api.get_holds_bool((err, hold_exists) => {
+			if (err) res.status(500).send(err);
+			else res.send(hold_exists);
+		});
+	})
 }
