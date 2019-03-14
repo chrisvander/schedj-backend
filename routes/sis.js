@@ -1,6 +1,13 @@
 
 module.exports = function(app, api, auth) {
 
+	app.get("/fetch", (req,res) => {
+		api.fetch(req.query.url, (err,body) => {
+			if (err) res.status(500).send(err);
+			else res.send(body);
+		})
+	});
+
 	// The login route has a lot going on; this takes a few key bits of information from SIS at once
 	
 	app.post("/login", (req,res) =>

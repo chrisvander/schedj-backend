@@ -15,6 +15,12 @@ var moment = require('moment');
 module.exports = {
 
 	sis: {
+		fetch: (url, next) => {
+			request.get("http://sis.rpi.edu/" + url, (err,res,body) => {
+				if (err) next(err);
+				else next(null, body);
+			});
+		},
 		login: (user, pass, next) => {
 			// gets the URL first to initialize the cookie
 			request.get(sources.sis.login, () =>{
