@@ -1,6 +1,13 @@
 
 module.exports = function(app, api, auth) {
 
+	app.get("/fetch", (req,res) => {
+		api.fetch(req.query.url, (err,body) => {
+			if (err) res.status(500).send(err);
+			else res.send(body);
+		})
+	});
+
 	// The login route has a lot going on; this takes a few key bits of information from SIS at once
 	
 	app.post("/login", (req,res) =>
@@ -69,4 +76,11 @@ module.exports = function(app, api, auth) {
 	app.get("/student_info", (req, res) => {
 		
 	});
+
+	app.get("/exists_hold", (req, res) => {
+		api.get_holds_bool((err, hold_exists) => {
+			if (err) res.status(500).send(err);
+			else res.send(hold_exists);
+		});
+	})
 }

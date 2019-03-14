@@ -15,6 +15,12 @@ var moment = require('moment');
 module.exports = {
 
 	sis: {
+		fetch: (url, next) => {
+			request.get("http://sis.rpi.edu/" + url, (err,res,body) => {
+				if (err) next(err);
+				else next(null, body);
+			});
+		},
 		login: (user, pass, next) => {
 			// gets the URL first to initialize the cookie
 			request.get(sources.sis.login, () =>{
@@ -125,6 +131,16 @@ module.exports = {
 		},
 		get_grades: (term, next) => {
 			
+		},
+		get_holds_bool: (next) => {
+			request.get(sources.sis.holds, (err, res, html) => {
+				if (err) next(err);
+				else {
+					if ($('body > div.pagebodydiv > table.datadisplaytable > tbody > tr:nth-child(2) > td:nth-child(1)').html()!='')
+						next(null, true);
+					else next(null, false);
+				}
+			})
 		}
 	},
 
