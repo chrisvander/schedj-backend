@@ -29,6 +29,10 @@ module.exports = function(app, api, auth) {
 		})
 	);
 
+	app.get("/schedule/today", (req,res) => {
+		
+	});
+
 	// Logout route
 	app.get("/logout", (req,res) =>{
 		api.logout( (err) => {

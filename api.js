@@ -13,7 +13,6 @@ const $ = require('cheerio');
 var moment = require('moment');
 
 module.exports = {
-
 	sis: {
 		fetch: (url, next) => {
 			request.get("http://sis.rpi.edu/" + url, (err,res,body) => {
@@ -126,6 +125,12 @@ module.exports = {
 				}
 			});
 		},
+		get_weekly_schedule: (next) => {
+
+		},
+		get_today_schedule: (next) => {
+			request(sources.sis.schedule)
+		},
 		get_student_info: (next) => {
 			request.post()
 		},
@@ -136,7 +141,7 @@ module.exports = {
 			request.get(sources.sis.holds, (err, res, html) => {
 				if (err) next(err);
 				else {
-					if ($('body > div.pagebodydiv > table.datadisplaytable > tbody > tr:nth-child(2) > td:nth-child(1)').html()!='')
+					if ($('div.pagebodydiv > table.datadisplaytable > tbody > tr:nth-child(2)', html).html()!=null)
 						next(null, true);
 					else next(null, false);
 				}
