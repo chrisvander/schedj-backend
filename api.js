@@ -170,6 +170,14 @@ module.exports = {
 				}
 			});
 		},
+		get_class_info: (crn, next) => {
+			request(sources.sis.schedule.class_info + crn, (err, res, html) => {
+				if (err) next(err);
+				else {
+					next(null, html);
+				}
+			});
+		},
 		get_student_info: (next) => {
 			request.post()
 		},

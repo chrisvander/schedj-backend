@@ -39,6 +39,17 @@ module.exports = function(app, api, auth) {
 		})
 	});
 
+	app.get("/class_info", (req,res) => {
+		api.get_class_info(req.query.crn, (err, body) => {
+			if (!err)
+				res.send(body);
+			else {
+				res.statusMessage = err;
+				res.status(500).send(err);
+			}
+		});
+	});
+
 	// Logout route
 	app.get("/logout", (req,res) =>{
 		api.logout( (err) => {

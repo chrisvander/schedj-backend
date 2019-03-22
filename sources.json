@@ -8,7 +8,8 @@
 		"registration": "https://sis.rpi.edu/rss/bwskrsta.P_RegsStatusDisp",
 		"holds": "https://sis.rpi.edu/rss/bwskoacc.P_ViewHold",
 		"schedule": {
-			"current_week": "https://sis.rpi.edu/rss/bwskfshd.P_CrseSchd"
+			"current_week": "https://sis.rpi.edu/rss/bwskfshd.P_CrseSchd",
+			"class_info": "https://sis.rpi.edu/rss/bwskfshd.P_CrseSchdDetl?crn="
 		}
 	},
 	"yacs": {
