@@ -75,6 +75,16 @@ module.exports = {
 			});
 		},
 		get_current_term: (next) => {
+			request.get(sources.sis.schedule.current_week, (err, res, html) => {
+				if (!err) {
+					//success!
+					var reply = $('input[name="termDir"]', html).attr('value');
+			    next(null, reply);
+			  }
+			  else next(err);
+			});
+		},
+		get_next_term: (next) => {
 			request.get(sources.sis.classes, (err, res, html) => {
 				if (!err) {
 					//success!
@@ -112,7 +122,13 @@ module.exports = {
 				if (err) next(err);
 				else {
 					var obj = {};
-					var arr = $('div.pagebodydiv > table:nth-child(2) > tbody > tr:nth-child(2)', html).html().split('\n');
+					try {
+						var arr = $('div.pagebodydiv > table:nth-child(2) > tbody > tr:nth-child(2)', html).html().split('\n');
+					}
+					catch (err) {
+						next(err);
+						return;
+					}
 					var start = moment($('td', arr[1]).text() + " " + $('td', arr[2]).text(), "MMM D, YYYY hh:mm a");
 					var end = moment($('td', arr[3]).text() + " " + $('td', arr[4]).text(), "MMM D, YYYY hh:mm a");
 					obj["start_date"] = start.format("MMMM Do");
@@ -170,11 +186,18 @@ module.exports = {
 				}
 			});
 		},
-		get_class_info: (crn, next) => {
-			request(sources.sis.schedule.class_info + crn, (err, res, html) => {
+		get_class_info: (crn, term, next) => {
+			request(sources.sis.schedule.class_info + crn + "&term_in=" + term, (err, res, html) => {
 				if (err) next(err);
 				else {
-					next(null, html);
+					var obj = {};
+					var split_info = $('div.pagebodydiv > table > caption', html).html().split(' - ');
+					obj["name"] = split_info[0];
+					obj["id"] = split_info[1];
+					obj["section"] = split_info[2];
+					obj["instructor"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td', html).text()
+					obj["instructor_email"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td > a', html).attr('href')	
+					next(null, obj);
 				}
 			});
 		},

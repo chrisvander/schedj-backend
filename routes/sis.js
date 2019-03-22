@@ -13,11 +13,11 @@ module.exports = function(app, api, auth) {
 		api.login(req.query.user, req.query.pass, (err, cookie, name) => {
 			if (!err) {
 				if (cookie[0].startsWith("SESSID=;")) res.status(403).send("No SESSID returned");
-				else api.get_current_term((err, term) => {
+				else api.get_next_term((err, term) => {
 					var reply = new Object();
-					reply.term = term;
 					reply.sessid = cookie[0].replace("SESSID=", "");
 					reply.name = name;
+					reply.term = term;
 					res.send(JSON.stringify(reply));
 				});
 			}
@@ -40,13 +40,15 @@ module.exports = function(app, api, auth) {
 	});
 
 	app.get("/class_info", (req,res) => {
-		api.get_class_info(req.query.crn, (err, body) => {
-			if (!err)
-				res.send(body);
-			else {
-				res.statusMessage = err;
-				res.status(500).send(err);
-			}
+		api.get_current_term((err, term) => {
+			api.get_class_info(req.query.crn, term, (err, body) => {
+				if (!err)
+					res.send(body);
+				else {
+					res.statusMessage = err;
+					res.status(500).send(err);
+				}
+			});
 		});
 	});
 
