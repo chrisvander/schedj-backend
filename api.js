@@ -134,6 +134,7 @@ module.exports = {
 					var obj = {
 						'start': '',
 						'end': '',
+						'today': [],
 						'clinfo': [[],[],[],[],[]]
 					};
 					$('div.pagebodydiv > table.datadisplaytable > tbody tr', html).each((i, row) => {
@@ -150,14 +151,18 @@ module.exports = {
 
 								if (obj.end==='') obj.end = end_time.format(m_f);
 								else if (moment(obj.end, m_f).isBefore(end_time)) obj.end = end_time.format(m_f);
-								
-								obj.clinfo[j].push({
+
+								var classinfo = {
 									"name": clinfo[0],
 									"CRN": clinfo[1].split(' ')[0],
 									"start_time": start_time.format(m_f),
 									"end_time": end_time.format(m_f),
 									"location": clinfo[3]
-								});
+								}
+								
+								obj.clinfo[j].push(classinfo);
+								if (moment().day()-1 == j) 
+									obj.today.push(classinfo);
 							}
 						});
 					});
