@@ -125,11 +125,45 @@ module.exports = {
 				}
 			});
 		},
-		get_weekly_schedule: (next) => {
+		get_schedule: (next) => {
+			request(sources.sis.schedule.current_week, (err, res, html) => {
+				if (err) next(err);
+				else {
+					var schedule_date = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+					// ordered by day of the week
+					var obj = {
+						'start': '',
+						'end': '',
+						'clinfo': [[],[],[],[],[]]
+					};
+					$('div.pagebodydiv > table.datadisplaytable > tbody tr', html).each((i, row) => {
+						$('td', row).each((j, td) => {
+							var classinfo = $('a', td).html();
+							if (classinfo) {
+								var m_f = 'h:mm a';
+								var clinfo = classinfo.split('<br>');
+								var start_time = moment(clinfo[2].split('-')[0], m_f);
+								var end_time = moment(clinfo[2].split('-')[1], m_f);
 
-		},
-		get_today_schedule: (next) => {
-			request(sources.sis.schedule)
+								if (obj.start==='') obj.start = start_time.format(m_f);
+								else if (moment(obj.start, m_f).isAfter(start_time)) obj.start = start_time.format(m_f);
+
+								if (obj.end==='') obj.end = end_time.format(m_f);
+								else if (moment(obj.end, m_f).isBefore(end_time)) obj.end = end_time.format(m_f);
+								
+								obj.clinfo[j].push({
+									"name": clinfo[0],
+									"CRN": clinfo[1].split(' ')[0],
+									"start_time": start_time.format(m_f),
+									"end_time": end_time.format(m_f),
+									"location": clinfo[3]
+								});
+							}
+						});
+					});
+					next(null, JSON.stringify(obj));
+				}
+			});
 		},
 		get_student_info: (next) => {
 			request.post()

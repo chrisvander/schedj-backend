@@ -1,4 +1,3 @@
-
 module.exports = function(app, api, auth) {
 
 	app.get("/fetch", (req,res) => {
@@ -29,8 +28,15 @@ module.exports = function(app, api, auth) {
 		})
 	);
 
-	app.get("/schedule/today", (req,res) => {
-		
+	app.get("/schedule", (req,res) => {
+		api.get_schedule((err, body) => {
+			if (!err)
+				res.send(body);
+			else {
+				res.statusMessage = err;
+				res.status(500).send(err);
+			}
+		})
 	});
 
 	// Logout route
