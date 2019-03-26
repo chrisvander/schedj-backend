@@ -129,8 +129,21 @@ module.exports = {
 		get_student_info: (next) => {
 			request.post()
 		},
-		get_grades: (term, next) => {
-			
+		get_grades: (term_in, next) => {
+			request.post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
+					if (err) next(err);
+					var obj = {};
+					var arr = $('div.pagebodydiv > table:nth-child(2) > tbody > tr:nth-child(2)', html).html().split('\n');
+					var start = moment($('td', arr[1]).text() + " " + $('td', arr[2]).text(), "MMM D, YYYY hh:mm a");
+					var end = moment($('td', arr[3]).text() + " " + $('td', arr[4]).text(), "MMM D, YYYY hh:mm a");
+					obj["start_date"] = start.format("MMMM Do");
+					obj["start_time"] = start.format("h:mm A");
+					obj["end_date"] = end.format("MMMM Do");
+					obj["end_time"] = end.format("h:mm A");
+					obj["start_passed"] = start.isBefore();
+					obj["end_passed"] = end.isBefore();
+					next(null, obj);
+			});
 		},
 		get_holds_bool: (next) => {
 			request.get(sources.sis.holds, (err, res, html) => {
@@ -144,8 +157,8 @@ module.exports = {
 		}
 	},
 
-	
-	
+
+
 	yacs: {
 		departments: (next) => {
 			request.get(sources.yacs.departments, (err, res, body) => {

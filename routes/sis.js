@@ -9,7 +9,7 @@ module.exports = function(app, api, auth) {
 	});
 
 	// The login route has a lot going on; this takes a few key bits of information from SIS at once
-	
+
 	app.post("/login", (req,res) =>
 		api.login(req.query.user, req.query.pass, (err, cookie, name) => {
 			if (!err) {
@@ -74,7 +74,12 @@ module.exports = function(app, api, auth) {
 	});
 
 	app.get("/student_info", (req, res) => {
-		
+
+	});
+
+	app.get("/grades", (req, res) => {
+		var term_in = req.query.term_in;
+		if (!term_in) res.status(400).send("Requires term_in param");
 	});
 
 	app.get("/exists_hold", (req, res) => {
