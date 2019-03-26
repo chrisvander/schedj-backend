@@ -7,7 +7,11 @@
 		"address": "https://sis.rpi.edu/rss/bwgkogad.P_SelectAtypUpdate",
 		"registration": "https://sis.rpi.edu/rss/bwskrsta.P_RegsStatusDisp",
 		"holds": "https://sis.rpi.edu/rss/bwskoacc.P_ViewHold",
-		"grades": "https://sis.rpi.edu/rss/bwskogrd.P_ViewGrde"
+		"grades": "https://sis.rpi.edu/rss/bwskogrd.P_ViewGrde",
+		"schedule": {
+			"current_week": "https://sis.rpi.edu/rss/bwskfshd.P_CrseSchd",
+			"class_info": "https://sis.rpi.edu/rss/bwskfshd.P_CrseSchdDetl?crn="
+		}
 	},
 	"yacs": {
 		"departments": "https://yacs.cs.rpi.edu/api/v5/schools.json?show_departments=true",

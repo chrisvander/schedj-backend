@@ -13,7 +13,6 @@ const $ = require('cheerio');
 var moment = require('moment');
 
 module.exports = {
-
 	sis: {
 		fetch: (url, next) => {
 			request.get("http://sis.rpi.edu/" + url, (err,res,body) => {
@@ -76,6 +75,16 @@ module.exports = {
 			});
 		},
 		get_current_term: (next) => {
+			request.get(sources.sis.schedule.current_week, (err, res, html) => {
+				if (!err) {
+					//success!
+					var reply = $('input[name="termDir"]', html).attr('value');
+			    next(null, reply);
+			  }
+			  else next(err);
+			});
+		},
+		get_next_term: (next) => {
 			request.get(sources.sis.classes, (err, res, html) => {
 				if (!err) {
 					//success!
@@ -113,7 +122,13 @@ module.exports = {
 				if (err) next(err);
 				else {
 					var obj = {};
-					var arr = $('div.pagebodydiv > table:nth-child(2) > tbody > tr:nth-child(2)', html).html().split('\n');
+					try {
+						var arr = $('div.pagebodydiv > table:nth-child(2) > tbody > tr:nth-child(2)', html).html().split('\n');
+					}
+					catch (err) {
+						next(err);
+						return;
+					}
 					var start = moment($('td', arr[1]).text() + " " + $('td', arr[2]).text(), "MMM D, YYYY hh:mm a");
 					var end = moment($('td', arr[3]).text() + " " + $('td', arr[4]).text(), "MMM D, YYYY hh:mm a");
 					obj["start_date"] = start.format("MMMM Do");
@@ -122,6 +137,66 @@ module.exports = {
 					obj["end_time"] = end.format("h:mm A");
 					obj["start_passed"] = start.isBefore();
 					obj["end_passed"] = end.isBefore();
+					next(null, obj);
+				}
+			});
+		},
+		get_schedule: (next) => {
+			request(sources.sis.schedule.current_week, (err, res, html) => {
+				if (err) next(err);
+				else {
+					var schedule_date = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+					// ordered by day of the week
+					var obj = {
+						'start': '',
+						'end': '',
+						'today': [],
+						'clinfo': [[],[],[],[],[]]
+					};
+					$('div.pagebodydiv > table.datadisplaytable > tbody tr', html).each((i, row) => {
+						$('td', row).each((j, td) => {
+							var classinfo = $('a', td).html();
+							if (classinfo) {
+								var m_f = 'h:mm a';
+								var clinfo = classinfo.split('<br>');
+								var start_time = moment(clinfo[2].split('-')[0], m_f);
+								var end_time = moment(clinfo[2].split('-')[1], m_f);
+
+								if (obj.start==='') obj.start = start_time.format(m_f);
+								else if (moment(obj.start, m_f).isAfter(start_time)) obj.start = start_time.format(m_f);
+
+								if (obj.end==='') obj.end = end_time.format(m_f);
+								else if (moment(obj.end, m_f).isBefore(end_time)) obj.end = end_time.format(m_f);
+
+								var classinfo = {
+									"name": clinfo[0],
+									"CRN": clinfo[1].split(' ')[0],
+									"start_time": start_time.format(m_f),
+									"end_time": end_time.format(m_f),
+									"location": clinfo[3]
+								}
+								
+								obj.clinfo[j].push(classinfo);
+								if (moment().day()-1 == j) 
+									obj.today.push(classinfo);
+							}
+						});
+					});
+					next(null, JSON.stringify(obj));
+				}
+			});
+		},
+		get_class_info: (crn, term, next) => {
+			request(sources.sis.schedule.class_info + crn + "&term_in=" + term, (err, res, html) => {
+				if (err) next(err);
+				else {
+					var obj = {};
+					var split_info = $('div.pagebodydiv > table > caption', html).html().split(' - ');
+					obj["name"] = split_info[0];
+					obj["id"] = split_info[1];
+					obj["section"] = split_info[2];
+					obj["instructor"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td', html).text()
+					obj["instructor_email"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td > a', html).attr('href')	
 					next(null, obj);
 				}
 			});
@@ -149,7 +224,7 @@ module.exports = {
 			request.get(sources.sis.holds, (err, res, html) => {
 				if (err) next(err);
 				else {
-					if ($('body > div.pagebodydiv > table.datadisplaytable > tbody > tr:nth-child(2) > td:nth-child(1)').html()!='')
+					if ($('div.pagebodydiv > table.datadisplaytable > tbody > tr:nth-child(2)', html).html()!=null)
 						next(null, true);
 					else next(null, false);
 				}
