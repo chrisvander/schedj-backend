@@ -208,10 +208,58 @@ module.exports = {
 			request.post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
 				if (err) next(err);
 				else {
-					var obj = {};
+					var obj = {
+						'CRN': [],
+						'SUBJ': [],
+						'COURSE': [],
+						'SECTION': [],
+						'TITLE': [],
+						'GRADE': [],
+						'ATTEMPTED': [],
+						'EARNED': [],
+						'GPA_HRS': [],
+						'POINTS': []
+					};
+					var param;
 					$('div.pagebodydiv > table:nth-child(4) > tbody', html).each((i, row) => {
-						$('td', row).each((j, row)=>{
-							$.each(row, console.log(row));
+						$('tr', row).each((j, row)=>{
+							//console.log(row.html);
+							$( "td", row ).each(function( index ) {
+								if (index == 0){
+									if ($(this).text().trim() != ""){
+									  obj.CRN.push( $(this).text().trim() );
+									}
+								}
+								if (index == 1){
+									obj.SUBJ.push( $(this).text().trim() );
+								}
+								if (index == 2){
+									obj.COURSE.push( $(this).text().trim() );
+								}
+								if (index == 3){
+									obj.SECTION.push( $(this).text().trim() );
+								}
+								if (index == 4){
+									obj.TITLE.push( $(this).text().trim() );
+								}
+								if (index == 6){
+									obj.GRADE.push( $(this).text().trim() );
+								}
+								if (index == 7){
+									obj.ATTEMPTED.push( $(this).text().trim() );
+								}
+								if (index == 8){
+									obj.EARNED.push( $(this).text().trim() );
+								}
+								if (index == 9){
+									obj.GPA_HRS.push( $(this).text().trim() );
+								}
+								if (index == 10){
+									obj.POINTS.push( $(this).text().trim() );
+								}
+
+							});
+
 						});
 					});
 					next(null, obj);
