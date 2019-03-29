@@ -175,9 +175,9 @@ module.exports = {
 									"end_time": end_time.format(m_f),
 									"location": clinfo[3]
 								}
-								
+
 								obj.clinfo[j].push(classinfo);
-								if (moment().day()-1 == j) 
+								if (moment().day()-1 == j)
 									obj.today.push(classinfo);
 							}
 						});
@@ -196,7 +196,7 @@ module.exports = {
 					obj["id"] = split_info[1];
 					obj["section"] = split_info[2];
 					obj["instructor"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td', html).text()
-					obj["instructor_email"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td > a', html).attr('href')	
+					obj["instructor_email"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td > a', html).attr('href')
 					next(null, obj);
 				}
 			});
@@ -206,18 +206,16 @@ module.exports = {
 		},
 		get_grades: (term_in, next) => {
 			request.post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
-					if (err) next(err);
+				if (err) next(err);
+				else {
 					var obj = {};
-					var arr = $('div.pagebodydiv > table:nth-child(2) > tbody > tr:nth-child(2)', html).html().split('\n');
-					var start = moment($('td', arr[1]).text() + " " + $('td', arr[2]).text(), "MMM D, YYYY hh:mm a");
-					var end = moment($('td', arr[3]).text() + " " + $('td', arr[4]).text(), "MMM D, YYYY hh:mm a");
-					obj["start_date"] = start.format("MMMM Do");
-					obj["start_time"] = start.format("h:mm A");
-					obj["end_date"] = end.format("MMMM Do");
-					obj["end_time"] = end.format("h:mm A");
-					obj["start_passed"] = start.isBefore();
-					obj["end_passed"] = end.isBefore();
+					$('div.pagebodydiv > table:nth-child(4) > tbody', html).each((i, row) => {
+						$('td', row).each((j, row)=>{
+							$.each(row, console.log(row));
+						});
+					});
 					next(null, obj);
+				}
 			});
 		},
 		get_holds_bool: (next) => {

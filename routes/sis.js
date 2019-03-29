@@ -103,6 +103,13 @@ module.exports = function(app, api, auth) {
 	app.get("/grades", (req, res) => {
 		var term_in = req.query.term_in;
 		if (!term_in) res.status(400).send("Requires term_in param");
+		else api.get_grades(term_in, (err, data) => {
+			if (err)
+				res.status(500).send(err);
+			else {
+				res.send(data);
+			}
+		});
 	});
 
 	app.get("/exists_hold", (req, res) => {
