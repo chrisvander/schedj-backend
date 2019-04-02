@@ -208,59 +208,42 @@ module.exports = {
 			request.post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
 				if (err) next(err);
 				else {
-					var obj = {
-						'CRN': [],
-						'SUBJ': [],
-						'COURSE': [],
-						'SECTION': [],
-						'TITLE': [],
-						'GRADE': [],
-						'ATTEMPTED': [],
-						'EARNED': [],
-						'GPA_HRS': [],
-						'POINTS': []
-					};
+					var obj = [];
 					var param;
-					$('div.pagebodydiv > table:nth-child(4) > tbody', html).each((i, row) => {
-						$('tr', row).each((j, row)=>{
-							//console.log(row.html);
-							$( "td", row ).each(function( index ) {
-								if (index == 0){
-									if ($(this).text().trim() != ""){
-									  obj.CRN.push( $(this).text().trim() );
-									}
-								}
-								if (index == 1){
-									obj.SUBJ.push( $(this).text().trim() );
-								}
-								if (index == 2){
-									obj.COURSE.push( $(this).text().trim() );
-								}
-								if (index == 3){
-									obj.SECTION.push( $(this).text().trim() );
-								}
-								if (index == 4){
-									obj.TITLE.push( $(this).text().trim() );
-								}
-								if (index == 6){
-									obj.GRADE.push( $(this).text().trim() );
-								}
-								if (index == 7){
-									obj.ATTEMPTED.push( $(this).text().trim() );
-								}
-								if (index == 8){
-									obj.EARNED.push( $(this).text().trim() );
-								}
-								if (index == 9){
-									obj.GPA_HRS.push( $(this).text().trim() );
-								}
-								if (index == 10){
-									obj.POINTS.push( $(this).text().trim() );
-								}
+					$('div.pagebodydiv > table:nth-child(4) > tbody > tr', html).each((j, row)=>{
+							// skip 0th row, it only has headings for each thing
+							if (j==0) return;
 
+							// creates a variable that holds all the data for a row
+							var course_data = {
+								'CRN': '',
+								'SUBJ': '',
+								'COURSE': '',
+								'SECTION': '',
+								'TITLE': '',
+								'CAMPUS': '',
+								'GRADE': '',
+								'ATTEMPTED': '',
+								'EARNED': '',
+								'GPA_HRS': '',
+								'POINTS': ''
+							};
+
+							// goes through each column in the rows
+							$( "td", row ).each(function( index ) {
+								// scrapes the text from the column
+								var txt = $(this).text().trim();
+								var i=0;
+								// inputs the text into the course_data
+								for (var prop in course_data) {
+									if (index==i)
+										course_data[prop] = txt;
+									i+=1;
+								}
 							});
 
-						});
+							// inputs course_data object into obj for returning
+							obj.push(course_data);
 					});
 					next(null, obj);
 				}
