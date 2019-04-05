@@ -175,9 +175,9 @@ module.exports = {
 									"end_time": end_time.format(m_f),
 									"location": clinfo[3]
 								}
-								
+
 								obj.clinfo[j].push(classinfo);
-								if (moment().day()-1 == j) 
+								if (moment().day()-1 == j)
 									obj.today.push(classinfo);
 							}
 						});
@@ -196,7 +196,7 @@ module.exports = {
 					obj["id"] = split_info[1];
 					obj["section"] = split_info[2];
 					obj["instructor"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td', html).text()
-					obj["instructor_email"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td > a', html).attr('href')	
+					obj["instructor_email"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td > a', html).attr('href')
 					next(null, obj);
 				}
 			});
@@ -204,8 +204,50 @@ module.exports = {
 		get_student_info: (next) => {
 			request.post()
 		},
-		get_grades: (term, next) => {
-			
+		get_grades: (term_in, next) => {
+			request.post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
+				if (err) next(err);
+				else {
+					var obj = [];
+					var param;
+					$('div.pagebodydiv > table:nth-child(4) > tbody > tr', html).each((j, row)=>{
+							// skip 0th row, it only has headings for each thing
+							if (j==0) return;
+
+							// creates a variable that holds all the data for a row
+							var course_data = {
+								'CRN': '',
+								'SUBJ': '',
+								'COURSE': '',
+								'SECTION': '',
+								'TITLE': '',
+								'CAMPUS': '',
+								'GRADE': '',
+								'ATTEMPTED': '',
+								'EARNED': '',
+								'GPA_HRS': '',
+								'POINTS': ''
+							};
+
+							// goes through each column in the rows
+							$( "td", row ).each(function( index ) {
+								// scrapes the text from the column
+								var txt = $(this).text().trim();
+								var i=0;
+								// inputs the text into the course_data
+								for (var prop in course_data) {
+									if (index==i)
+										course_data[prop] = txt;
+									i+=1;
+								}
+							});
+
+							// inputs course_data object into obj for returning
+							obj.push(course_data);
+					});
+					next(null, obj);
+				}
+			});
 		},
 		get_holds_bool: (next) => {
 			request.get(sources.sis.holds, (err, res, html) => {
@@ -219,8 +261,8 @@ module.exports = {
 		}
 	},
 
-	
-	
+
+
 	yacs: {
 		departments: (next) => {
 			request.get(sources.yacs.departments, (err, res, body) => {
