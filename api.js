@@ -261,7 +261,8 @@ module.exports = {
 									obj.push(course_data);
 							});
 							grades_obj[term_in] = obj;
-							if (index==total-1) 
+							var size = Object.keys(grades_obj).length;
+							if (size==total) 
 								next(null, grades_obj)
 						}
 					}));
