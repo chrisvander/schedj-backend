@@ -213,7 +213,7 @@ module.exports = {
 		get_student_info: (next) => {
 			request.post()
 		},
-		get_grades: (t, next) => {
+		get_grades: (next) => {
 			request.get(sources.sis.grades_term, (err, res, html) => {
 				var requests = [];
 				var grades_obj = {};
