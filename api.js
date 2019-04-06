@@ -95,26 +95,31 @@ module.exports = {
 		},
 		get_address: (next) => {
 			request.get(sources.sis.address, (err, res, html) => {
-				if (!err) {
-					var data = {
-						address: '',
-						city: '',
-						zip: '',
-						zip_short: ''
+				try {
+					if (!err) {
+						var data = {
+							address: '',
+							city: '',
+							zip: '',
+							zip_short: ''
+						}
+						var raw = $('table.datadisplaytable > tbody > tr:nth-child(3) > td:nth-child(2)', html)
+							.html()
+							.replace(/\n/g,'')
+							.split('<br>');
+						var cityzip = raw[1].split('&#xA0; &#xA0; ');
+						data.address = raw[0];
+						data.city = cityzip[0].split(', ')[0];
+						data.state = cityzip[0].split(', ')[1];
+						data.zip = cityzip[1];
+						data.zip_short = cityzip[1].split('-')[0];
+						next(null, data);
 					}
-					var raw = $('table.datadisplaytable > tbody > tr:nth-child(3) > td:nth-child(2)', html)
-						.html()
-						.replace(/\n/g,'')
-						.split('<br>');
-					var cityzip = raw[1].split('&#xA0; &#xA0; ');
-					data.address = raw[0];
-					data.city = cityzip[0].split(', ')[0];
-					data.state = cityzip[0].split(', ')[1];
-					data.zip = cityzip[1];
-					data.zip_short = cityzip[1].split('-')[0];
-					next(null, data);
+					else next(err)
 				}
-				else next(err)
+				catch (err) {
+					next(err);
+				}
 			})
 		},
 		get_registration_status: (term, next) => {
@@ -191,62 +196,76 @@ module.exports = {
 				if (err) next(err);
 				else {
 					var obj = {};
-					var split_info = $('div.pagebodydiv > table > caption', html).html().split(' - ');
-					obj["name"] = split_info[0];
-					obj["id"] = split_info[1];
-					obj["section"] = split_info[2];
-					obj["instructor"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td', html).text()
-					obj["instructor_email"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td > a', html).attr('href')
-					next(null, obj);
+					var split_info = $('div.pagebodydiv > table > caption', html).html()
+					if (!split_info) next("No split object");
+					else {
+						split_info=split_info.split(' - ');
+						obj["name"] = split_info[0];
+						obj["id"] = split_info[1];
+						obj["section"] = split_info[2];
+						obj["instructor"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td', html).text()
+						obj["instructor_email"] = $('body > div.pagebodydiv > table:nth-child(3) > tbody > tr:nth-child(4) > td > a', html).attr('href')
+						next(null, obj);
+					}
 				}
 			});
 		},
 		get_student_info: (next) => {
 			request.post()
 		},
-		get_grades: (term_in, next) => {
-			request.post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
-				if (err) next(err);
-				else {
-					var obj = [];
-					var param;
-					$('div.pagebodydiv > table:nth-child(4) > tbody > tr', html).each((j, row)=>{
-							// skip 0th row, it only has headings for each thing
-							if (j==0) return;
+		get_grades: (t, next) => {
+			request.get(sources.sis.grades_term, (err, res, html) => {
+				var requests = [];
+				var grades_obj = {};
+				var total = $('#term_id > option', html).length;
+				if (total==0) next("No results");
+				$('#term_id > option', html).each((index, option)=> {
+					var term_in = $(option).attr('value');
+					requests.push(request.post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
+						if (err) next(err);
+						else {
+							var obj = [];
+							var param;
+							$('div.pagebodydiv > table:nth-child(4) > tbody > tr', html).each((j, row)=>{
+									// skip 0th row, it only has headings for each thing
+									if (j==0) return;
+									// creates a variable that holds all the data for a row
+									var course_data = {
+										'CRN': '',
+										'SUBJ': '',
+										'COURSE': '',
+										'SECTION': '',
+										'TITLE': '',
+										'CAMPUS': '',
+										'GRADE': '',
+										'ATTEMPTED': '',
+										'EARNED': '',
+										'GPA_HRS': '',
+										'POINTS': ''
+									};
 
-							// creates a variable that holds all the data for a row
-							var course_data = {
-								'CRN': '',
-								'SUBJ': '',
-								'COURSE': '',
-								'SECTION': '',
-								'TITLE': '',
-								'CAMPUS': '',
-								'GRADE': '',
-								'ATTEMPTED': '',
-								'EARNED': '',
-								'GPA_HRS': '',
-								'POINTS': ''
-							};
+									// goes through each column in the rows
+									$( "td", row ).each(function( index ) {
+										// scrapes the text from the column
+										var txt = $(this).text().trim();
+										var i=0;
+										// inputs the text into the course_data
+										for (var prop in course_data) {
+											if (index==i)
+												course_data[prop] = txt;
+											i+=1;
+										}
+									});
 
-							// goes through each column in the rows
-							$( "td", row ).each(function( index ) {
-								// scrapes the text from the column
-								var txt = $(this).text().trim();
-								var i=0;
-								// inputs the text into the course_data
-								for (var prop in course_data) {
-									if (index==i)
-										course_data[prop] = txt;
-									i+=1;
-								}
+									// inputs course_data object into obj for returning
+									obj.push(course_data);
 							});
-
-							// inputs course_data object into obj for returning
-							obj.push(course_data);
-					});
-					next(null, obj);
-				}
+							grades_obj[term_in] = obj;
+							if (index==total-1) 
+								next(null, grades_obj)
+						}
+					}));
+				});
 			});
 		},
 		get_holds_bool: (next) => {
