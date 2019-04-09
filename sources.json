@@ -12,7 +12,8 @@
 		"schedule": {
 			"current_week": "https://sis.rpi.edu/rss/bwskfshd.P_CrseSchd",
 			"class_info": "https://sis.rpi.edu/rss/bwskfshd.P_CrseSchdDetl?crn="
-		}
+		},
+		"register": "https://sis.rpi.edu/rss/bwckcoms.P_Regs"	
 	},
 	"yacs": {
 		"departments": "https://yacs.cs.rpi.edu/api/v5/schools.json?show_departments=true",
