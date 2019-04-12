@@ -9,6 +9,7 @@ request = request.defaults({
 
 const sources = require('./sources.json');
 const $ = require('cheerio');
+const reg_params = require('./register.js');
 
 var moment = require('moment');
 
@@ -49,32 +50,22 @@ module.exports = {
 				});
 			});
 		},
-		register: (term, CRN[], next) => {
+		register: (term, CRN, next) => {
 			// gets the registration
 			request.get(sources.sis.register, () =>{
 				request({
 				  uri: sources.sis.register,
 				  method: "POST",
-				  qs: {
-					"term_in": term,
-					//TODO: add more variables. figure out how adding the same variable works.
-				  }
-				}, (err, res, body) => {
+				  qs: reg_params(term, CRN)
+				},
+				(err, res, body) => {
 					if (!err && res.statusCode == 200) {
-						var msg = $('meta',body).attr('content');
-						try {
-							next(null, res.headers['set-cookie'], msg.slice(
-		          	msg.indexOf('Welcome,+')+9,
-		          	msg.indexOf('+to+the+Rensselaer')-1
-		          ));
-						}
-	          catch (err) {
-	          	next("Problem communicating with SIS");
-	          }
-	        } else {
-            next(err);
-	        }
-				});
+						next(null);
+					}
+			        else{
+			         	next("Problem communicating with SIS");
+			        }
+		        });
 			});
 		},
 		logout: (next) => {

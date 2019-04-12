@@ -28,6 +28,17 @@ module.exports = function(app, api, auth) {
 		})
 	);
 
+	app.post("/course/add", (req, res) =>{
+		var CRN = req.query.CRN_IN;
+		api.register(req.query.term_in, CRN, (err, body) => {
+			if (!err)
+				res.send(body);
+			else {
+				res.status(500).send(err);
+			}
+		});
+	});
+
 	app.get("/schedule", (req,res) => {
 		api.get_schedule((err, body) => {
 			if (!err)
