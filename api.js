@@ -60,7 +60,8 @@ module.exports = {
 				},
 				(err, res, body) => {
 					if (!err && res.statusCode == 200) {
-						next(null);
+						next("SUCCESS");
+						// ISSUE: does not actually reflect errors like being past your registration time
 					}
 			        else{
 			         	next("Problem communicating with SIS");
