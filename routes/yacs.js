@@ -1,4 +1,4 @@
-module.exports = (app, api, update) => {
+module.exports = (app, update) => {
 
 	app.get("/api/update", (req,res) => {
 		update();
