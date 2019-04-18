@@ -50,25 +50,6 @@ module.exports = {
 				});
 			});
 		},
-		register: (term, CRN, next) => {
-			// gets the registration
-			request.get(sources.sis.register, () =>{
-				request({
-				  uri: sources.sis.register,
-				  method: "POST",
-				  qs: reg_params(term, CRN)
-				},
-				(err, res, body) => {
-					if (!err && res.statusCode == 200) {
-						next("SUCCESS");
-						// ISSUE: does not actually reflect errors like being past your registration time
-					}
-			        else{
-			         	next("Problem communicating with SIS");
-			        }
-		        });
-			});
-		},
 		logout: (next) => {
 			// gets URL first
 			request({
@@ -165,6 +146,34 @@ module.exports = {
 					next(null, obj);
 				}
 			});
+		},
+		register: (term, CRN, next) => {
+			this.sis.get_registration_status(term, (reg_err, reg_status) => {
+				if (reg_err) // if an error occurs with the get registration status function, abort
+					next("Invalid term");
+				else{
+					// this variable checks to make sure that your registration status is correct
+					var valid_reg_time = (reg_status["start_passed"] && !reg_status["end_passed"]);
+					// gets the registration URL
+						request({
+							uri: sources.sis.register,
+							method: "POST",
+							// this represents all the parameters of the request. there are a lot, so they're stored in register.js
+							qs: reg_params(term, CRN)
+						},
+						(err, res, body) => {
+							if (!err && res.statusCode == 200 && valid_reg_time) {
+								next("SUCCESS");
+							}
+							else{
+								if (!valid_reg_time)
+									next("Registering during the wrong time");
+								next("Problem communicating with SIS");
+							}
+						});
+				}
+			});
+
 		},
 		get_schedule: (next) => {
 			request(sources.sis.schedule.current_week, (err, res, html) => {
