@@ -234,7 +234,7 @@ module.exports = (sessid) => {
 					if (total==0) next("No results");
 					$('#term_id > option', html).each((index, option)=> {
 						var term_in = $(option).attr('value');
-						requests.push(request.post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
+						requests.push(r().post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
 							if (err) next(err);
 							else {
 								var obj = [];
@@ -276,7 +276,7 @@ module.exports = (sessid) => {
 								grades_obj[term_in] = obj;
 								var size = Object.keys(grades_obj).length;
 								if (size==total) 
-									next(null, grades_obj)
+									Promise.all(requests).then(()=>next(null, grades_obj));
 							}
 						}));
 					});
