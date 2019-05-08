@@ -1,6 +1,7 @@
 const sources = require('./sources.json');
 const $ = require('cheerio');
 var request = require("request");
+
 var moment = require('moment');
 const j = request.jar()
 
@@ -232,54 +233,65 @@ module.exports = (sessid) => {
 					var grades_obj = {};
 					var total = $('#term_id > option', html).length;
 					if (total==0) next("No results");
+
+					const convertGrades = (html) => {
+						var obj = [];
+						var param;
+						$('div.pagebodydiv > table:nth-child(4) > tbody > tr', html).each((j, row)=>{
+								// skip 0th row, it only has headings for each thing
+								if (j==0) return;
+								// creates a variable that holds all the data for a row
+								var course_data = {
+									'CRN': '',
+									'SUBJ': '',
+									'COURSE': '',
+									'SECTION': '',
+									'TITLE': '',
+									'CAMPUS': '',
+									'GRADE': '',
+									'ATTEMPTED': '',
+									'EARNED': '',
+									'GPA_HRS': '',
+									'POINTS': ''
+								};
+
+								// goes through each column in the rows
+								$( "td", row ).each(function( index ) {
+									// scrapes the text from the column
+									var txt = $(this).text().trim();
+									var i=0;
+									// inputs the text into the course_data
+									for (var prop in course_data) {
+										if (index==i)
+											course_data[prop] = txt;
+										i+=1;
+									}
+								});
+
+								// inputs course_data object into obj for returning
+								obj.push(course_data);
+						});
+						return obj;
+					}
+
+					let reqPromise = (source) => {
+						return new Promise((resolve, reject) => {
+				      r().post(source, (err, res, data) => {
+				        if (err) reject(err);
+				        let result = convertGrades(data);
+				        resolve(result);
+				      });
+					  });
+					}
+
 					$('#term_id > option', html).each((index, option)=> {
 						var term_in = $(option).attr('value');
-						requests.push(r().post(sources.sis.grades + '?term_in=' + term_in, (err, res, html) => {
-							if (err) next(err);
-							else {
-								var obj = [];
-								var param;
-								$('div.pagebodydiv > table:nth-child(4) > tbody > tr', html).each((j, row)=>{
-										// skip 0th row, it only has headings for each thing
-										if (j==0) return;
-										// creates a variable that holds all the data for a row
-										var course_data = {
-											'CRN': '',
-											'SUBJ': '',
-											'COURSE': '',
-											'SECTION': '',
-											'TITLE': '',
-											'CAMPUS': '',
-											'GRADE': '',
-											'ATTEMPTED': '',
-											'EARNED': '',
-											'GPA_HRS': '',
-											'POINTS': ''
-										};
-
-										// goes through each column in the rows
-										$( "td", row ).each(function( index ) {
-											// scrapes the text from the column
-											var txt = $(this).text().trim();
-											var i=0;
-											// inputs the text into the course_data
-											for (var prop in course_data) {
-												if (index==i)
-													course_data[prop] = txt;
-												i+=1;
-											}
-										});
-
-										// inputs course_data object into obj for returning
-										obj.push(course_data);
-								});
-								grades_obj[term_in] = obj;
-								var size = Object.keys(grades_obj).length;
-								if (size==total) 
-									Promise.all(requests).then(()=>next(null, grades_obj));
-							}
-						}));
+						requests.push(reqPromise(sources.sis.grades + '?term_in=' + term_in)
+							.then(res => { grades_obj[term_in] = res; })
+						);
 					});
+					
+					Promise.all(requests).then(() => { next(null, grades_obj); });
 				});
 			},
 			get_holds_bool: (next) => {

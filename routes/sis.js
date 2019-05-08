@@ -3,7 +3,6 @@ module.exports = function(app, auth) {
 
 	function isAuthenticated(req, res, next) {
 		var cookie = req.cookies.SESSID;
-		console.log(cookie)
 		req.api = require('../api.js')(cookie).sis;
 
 	  if (req.cookies.SESSID)
@@ -117,11 +116,8 @@ module.exports = function(app, auth) {
 
 	app.get("/grades", (req, res) => {
 		req.api.get_grades((err, data) => {
-			if (err)
-				res.status(500).send(err);
-			else {
-				res.send(data);
-			}
+			if (err) res.status(500).send(err);
+			else res.send(data);
 		});
 	});
 
