@@ -1,8 +1,5 @@
-module.exports = (app, update) => {
+module.exports = (app) => {
 
-	app.get("/api/update", (req,res) => {
-		update();
-		res.send("Ran update");
-	});
+	
 
 }

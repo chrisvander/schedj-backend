@@ -93,7 +93,8 @@ module.exports = (sessid) => {
 					if (!err) {
 						//success!
 						var reply = $('input[name="termDir"]', html).attr('value');
-				    next(null, reply);
+				    if (reply) next(null, reply);
+				    else next("Could not find term... do you have a schedule this week?");
 				  }
 				  else next(err);
 				});
@@ -164,13 +165,14 @@ module.exports = (sessid) => {
 				r()(sources.sis.schedule.current_week, (err, res, html) => {
 					if (err) next(err);
 					else {
-						var schedule_date = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+						const startDate = $('table.plaintable .fieldlargetext', html).text().replace('Week of ','');
 						// ordered by day of the week
 						var obj = {
 							'start': '',
 							'end': '',
 							'today': [],
-							'clinfo': [[],[],[],[],[]]
+							'clinfo': [[],[],[],[],[]],
+							'startDate': startDate
 						};
 						$('div.pagebodydiv > table.datadisplaytable > tbody tr', html).each((i, row) => {
 							$('td', row).each((j, td) => {
@@ -232,9 +234,12 @@ module.exports = (sessid) => {
 					var requests = [];
 					var grades_obj = {};
 					var total = $('#term_id > option', html).length;
-					if (total==0) next("No results");
+					if (total==0) {
+						next("No results");
+						return;
+					}
 
-					const convertGrades = (html) => {
+					const convertGrades = (html, cb) => {
 						var obj = [];
 						var param;
 						$('div.pagebodydiv > table:nth-child(4) > tbody > tr', html).each((j, row)=>{
@@ -268,37 +273,38 @@ module.exports = (sessid) => {
 									}
 								});
 
+								grades_obj.gpa = $('div.pagebodydiv > table:nth-child(6) > tbody > tr:nth-child(5) > td:nth-child(6) > p', html).text();
+
 								// inputs course_data object into obj for returning
 								obj.push(course_data);
 						});
-						return obj;
+						cb(obj);
 					}
 
-					let reqPromise = (source) => {
+					let reqPromise = (source, term_in) => {
 						return new Promise((resolve, reject) => {
 				      r().post(source, (err, res, data) => {
-				        if (err) reject(err);
-				        let result = convertGrades(data);
-				        resolve(result);
+				        convertGrades(data, async (result) => {
+				        	grades_obj[term_in] = result;
+				        	resolve(result);
+				        });
 				      });
 					  });
 					}
 
-					$('#term_id > option', html).each((index, option)=> {
+					$('#term_id > option', html).each(async (index, option) => {
 						var term_in = $(option).attr('value');
-						requests.push(reqPromise(sources.sis.grades + '?term_in=' + term_in)
-							.then(res => { grades_obj[term_in] = res; })
-						);
+						requests.push(reqPromise(sources.sis.grades + '?term_in=' + term_in, term_in));
 					});
-					
-					Promise.all(requests).then(() => { next(null, grades_obj); });
+
+					Promise.all(requests).then(() => { next(null, grades_obj); return; });
 				});
 			},
 			get_holds_bool: (next) => {
 				r().get(sources.sis.holds, (err, res, html) => {
 					if (err) next(err);
 					else {
-						if ($('div.pagebodydiv > table.datadisplaytable > tbody > tr:nth-child(2)', html).html()!=null)
+						if ($('div.pagebodydiv > table.datadisplaytable > tbody > tr:nth-child(2)', html).html() != null)
 							next(null, true);
 						else next(null, false);
 					}

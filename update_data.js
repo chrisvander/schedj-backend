@@ -1,4 +1,4 @@
-const api = require('./api.js').yacs;
+const api = require('./api.js')(null).yacs;
 const fs = require('fs');
 const path = require('path');
 
@@ -38,12 +38,18 @@ module.exports = () => {
 
 				  var obj = JSON.parse(body)
 			    total = 0;
-			    obj.schools.forEach((school) => total+=school.departments.length);
-					obj.schools.forEach(
-						(school) => school.departments.forEach((item) => {
-							writeDepartment(item)
-						})
-					);
+			    try {
+			    	obj.schools.forEach((school) => total+=school.departments.length);
+						obj.schools.forEach(
+							(school) => school.departments.forEach((item) => {
+								writeDepartment(item)
+							})
+						);
+			    }
+			    catch (err) {
+			    	console.error("Could not load departments.")
+			    	console.error(obj);
+			    }
 				});
 			});
 	});

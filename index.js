@@ -9,8 +9,10 @@ var cookieParser = require('cookie-parser');
 var app = express();
 app.use(cookieParser());
 
-app.listen(8080, () => {
-	console.log("Listening on port 8080");
+const port = 4000;
+
+app.listen(port, () => {
+	console.log("Listening on port " + port);
 });
 
 // handshake
@@ -20,14 +22,19 @@ app.get("/verify_status", (req, res) => {
 });
 
 // YACS
-require('./routes/yacs.js')(app, runUpdate);
+require('./routes/yacs.js')(app);
 
 // SIS
 require('./routes/sis.js')(app);
 
+// Mock services
+require('./routes/mock.js')(app);
+
 // SERVER
 
-cron.schedule('0 0 * * *', () => {
-  console.log("Updating YACS data");
-  runUpdate();
-});
+// cron.schedule('0 0 * * *', () => {
+//   console.log("Updating YACS data");
+//   runUpdate();
+// });
+
+// runUpdate();

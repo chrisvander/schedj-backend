@@ -15,7 +15,7 @@
 		}
 	},
 	"yacs": {
-		"departments": "https://yacs.cs.rpi.edu/api/v5/schools.json?show_departments=true",
-		"courses": "https://yacs.cs.rpi.edu/api/v5/courses.json?department_id="
+		"departments": "https://yacs.cs.rpi.edu/api/v6/schools?show_departments=true",
+		"courses": "https://yacs.cs.rpi.edu/api/v6/courses?department_id="
 	}
 }

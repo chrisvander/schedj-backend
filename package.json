@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --ignore 'data/**/*' ."
+    "start": "autossh -M 0 -R cv-dev:80:localhost:4000 -R cv-ssh:22:localhost:22 serveo.net & nodemon --ignore 'data/**/*' . && fg"
   },
   "author": "",
   "license": "ISC",
