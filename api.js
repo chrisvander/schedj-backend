@@ -23,9 +23,12 @@ module.exports = (sessid) => {
 	return {
 		sis: {
 			fetch: (url, next) => {
-				request.get("http://sis.rpi.edu/" + url, (err,res,body) => {
-					if (err) next(err);
-					else next(null, body);
+				r().get("https://sis.rpi.edu/" + url, (err, res, html) => {
+					if (!err) {
+						//success!
+				    next(null, html);
+				  }
+				  else next(err);
 				});
 			},
 			login: (user, pass, next) => {
@@ -235,7 +238,7 @@ module.exports = (sessid) => {
 					var grades_obj = {};
 					var total = $('#term_id > option', html).length;
 					if (total==0) {
-						next("No results");
+						next(null, null);
 						return;
 					}
 

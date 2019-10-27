@@ -1,19 +1,28 @@
+const url = require('url');
+
 module.exports = function(app, auth) {
   var api = require('../api.js')(null).sis;
 
   function isAuthenticated(req, res, next) {
-    var cookie = req.cookies.SESSID;
-    req.api = require('../api.js')(cookie).sis;
+    if (req.query.token) {
+      res.cookie("SESSID", req.query.token);
+      res.redirect(url.parse(req.url).pathname + '?url=' + url.parse(req.url, true).query.url);
+    }
+    else {
+      var cookie = req.cookies.SESSID;
+      req.api = require('../api.js')(cookie).sis;
 
-    if (req.cookies.SESSID)
-      return next();
-    res.status(403).send('No SESSID token sent.');
+      if (req.cookies.SESSID)
+        return next();
+      res.status(403).send('No SESSID token sent.');
+    }
   }
 
   // The login route has a lot going on; this takes a few key bits of information from SIS at once
 
   app.post("/login", (req, res) => {
-    api.login(req.query.user, req.query.pass, (err, cookie, name) => {
+    console.log(req.body)
+    api.login(req.body.user, req.body.pass, (err, cookie, name) => {
       if (!err) {
         if (cookie[0].startsWith("SESSID=;")) res.status(403).send("No SESSID returned");
         else api.get_next_term((err, term) => {
@@ -33,6 +42,10 @@ module.exports = function(app, auth) {
   app.use(isAuthenticated);
 
   // IMPORTANT: ALL ROUTES BELOW THIS ARE PROTECTED
+
+  app.get("/session_token", (req, res) => {
+    res.send({"SESSID": req.cookies.SESSID});
+  });
 
   app.get("/fetch", (req, res) => {
     req.api.fetch(req.query.url, (err, body) => {

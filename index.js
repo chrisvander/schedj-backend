@@ -4,10 +4,17 @@ const cron = require('node-cron');
 const runUpdate = require('./update_data.js');
 const https = require('https');
 const fs = require('fs');
-var cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 
 var app = express();
 app.use(cookieParser());
+app.use(
+  bodyParser.urlencoded({
+    extended: true
+  })
+);
+app.use(bodyParser.json());
 
 const port = 4000;
 
